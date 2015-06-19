@@ -1,20 +1,25 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 #TODO: multi-dir support
 
 import os
 import datetime
+import time
 
-from subprocess import call
-from subprocess import Popen
-from subprocess import PIPE
+from subprocess import call, Popen, PIPE
 from string import Template
+
+from PIL import Image, ExifTags
 
 OUT_DIR = "out/"
 SRC_DIR = "src/"
 IMAGE_DIR = "img/"
 OUT_IMG_DIR = os.path.join(OUT_DIR, IMAGE_DIR)
 SRC_IMG_DIR = os.path.join(SRC_DIR, IMAGE_DIR)
+
+# IPTC lookup values
+IMAGE_DESC = 270
+TIMESTAMP = 306
 
 
 # set up necessary dir structure
@@ -64,12 +69,11 @@ for dpath, dnames, fnames in os.walk(OUT_IMG_DIR):
 
 
 # copy style.css
-print("copying style.css")
-call("cp {} {}".format(os.path.join(SRC_DIR, "style.css"), OUT_DIR), shell=True)
+print("copying css")
+call("cp {} {}".format(os.path.join(SRC_DIR, "*.css"), OUT_DIR), shell=True)
 
 # use pictures to build html
 print("generating index.html")
-print("generating captions...")
 
 index = open(os.path.join(SRC_DIR, "index.html")).read()
 pic_stub = open(os.path.join(SRC_DIR, "picture.html")).read()
@@ -77,38 +81,28 @@ pic_stub = open(os.path.join(SRC_DIR, "picture.html")).read()
 pic_template = Template(pic_stub) 
 index_template = Template(index)
 
+
 pics = ""
 for dpath, dnames, fnames in os.walk(OUT_IMG_DIR):
     for f in fnames:
         if isJpeg(f):
             uri= os.path.join(IMAGE_DIR, f)
+
             src = os.path.join(SRC_DIR, uri)
+            exif = Image.open(src)._getexif()
 
-            #TODO: this is real slow... maybe PIL/Pillow is faster??
-            # get date and description
-            desc = Popen(["identify", "-format", "%[IPTC:2:120]", src], stdout=PIPE).communicate()[0]
-            desc = desc.decode("utf-8")
+            if IMAGE_DESC in exif:
+                desc = exif[IMAGE_DESC] + "<br>"
+                print(desc)
+            else:
+                desc = ""
+                print("no description for", uri)
 
-            dateCreated = Popen(["identify", "-format", "%[IPTC:2:55]", src], stdout=PIPE).communicate()[0]
-            timeCreated = Popen(["identify", "-format", "%[IPTC:2:60]", src], stdout=PIPE).communicate()[0]
-
-            dc = dateCreated.decode("utf-8") 
-            tc = timeCreated.decode("utf-8")
-            
-            t = datetime.datetime(
-                    int(dc[:4]),        # year
-                    int(dc[4:6]),       # month 
-                    int(dc[6:8]),       # day
-                    int(tc[:2]),        # hour
-                    int(tc[2:4]),       # min
-                    int(tc[4:6]))       # second
-
-            date = t.strftime('%a %B %d %-H:%M:%S %Y')
-
-            if not desc == "":
-                desc += "<br>"
-                
-
+            if TIMESTAMP in exif:
+                t = datetime.datetime.strptime(exif[TIMESTAMP], "%Y:%m:%d %H:%M:%S")
+                date = t.strftime('%a %B %d %-H:%M:%S %Y')
+            else: 
+                raise("No timestamp?!?!?")
 
             pics += pic_template.substitute(large_uri=uri, 
                     img_uri=uri+".small", 
