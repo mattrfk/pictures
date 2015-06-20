@@ -1,6 +1,15 @@
 #!/usr/bin/env python3
 
-#TODO: multi-dir support
+# /img
+#   /page1
+#       /heading1
+#             images...
+#       /heading2
+#   /page2
+#       images...
+# Nothing allowed in root img dir
+# Anything in a subfolder gets a heading
+# any images in direct child dir of /img are displayed without heading
 
 import os
 import datetime
@@ -19,7 +28,7 @@ SRC_IMG_DIR = os.path.join(SRC_DIR, IMAGE_DIR)
 
 # IPTC lookup values
 IMAGE_DESC = 270
-TIMESTAMP = 306
+TIMESTAMP = 36868
 
 
 # set up necessary dir structure
@@ -111,5 +120,6 @@ for dpath, dnames, fnames in os.walk(OUT_IMG_DIR):
 
 index = index_template.substitute(pictures=pics)
 open(os.path.join(OUT_DIR, "index.html"), 'w').write(index)
+
 print("done!")
 
