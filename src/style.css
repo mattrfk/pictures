@@ -16,6 +16,23 @@ ul {
 #pictures-list{
 }
 
+#album-link{
+	text-color: black;
+	text-decoration: none;
+	font-size: 2em;
+}
+
+#date-text {
+	margin:8px;
+	color: gray;
+	font-family: "Courier New", Courier, monospace;
+	font-size: 0.9em;
+}
+
+#album-item {
+	margin-bottom:2em;
+}
+
 #caption {
   text-align: left;
   margin-top: 4px;

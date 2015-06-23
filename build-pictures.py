@@ -130,6 +130,17 @@ def build_pictures_page(d, title):
 
     return min(timestamps), max(timestamps)
 
+def album_time_string(min_time, max_time):
+    format_string = "%B %d, %Y"
+    date = min_time.strftime(format_string)
+
+    if (max_time - min_time).days > 0:
+        print("here")
+        date += " - {}".format(max_time.strftime(format_string))
+    
+    return date
+
+
 # build a page for each subdir in /img/ and add a link to index.html
 items = []
 for d in next(os.walk(SRC_IMG_DIR))[1]:
@@ -142,7 +153,10 @@ for d in next(os.walk(SRC_IMG_DIR))[1]:
     title = formatTitle(d)
     min_time, max_time = build_pictures_page(d, title)
     f = "{}.html".format(d)
-    stub = album_stub_template.substitute(path=f, title=title, date=min_time)
+
+    time_string = album_time_string(min_time, max_time)
+
+    stub = album_stub_template.substitute(path=f, title=title, date=time_string)
     items.append((min_time, max_time, stub))
 
 # items = items.sort(key=lambda x: x[0])
