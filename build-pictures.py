@@ -56,8 +56,8 @@ for dpath, dnames, fnames in os.walk(os.path.join(SRC_DIR, IMAGE_DIR)):
             print(src, "->", dest)
             call("convert -strip -interlace plane -gaussian-blur 0.05 -quality 85% {} {}".
                 format(src, dest), shell=True)
-        else:
-            print(src, "already exists")
+        # else:
+        #     print(src, "already exists")
 
         createThumb(800, dest, "{}.small".format(dest))
 
@@ -92,7 +92,7 @@ pic_stub_template = makeStub(os.path.join(SRC_DIR, "picture_stub.html"))
 album_stub_template = makeStub(os.path.join(SRC_DIR, "album_stub.html"))
 
 # do this for each directory in /img/
-def build_pictures_page(d):
+def build_pictures_page(d, title):
     pics = ""
     timestamps = []
 
@@ -125,7 +125,7 @@ def build_pictures_page(d):
                         alt="",
                         caption="{}{}".format(desc, date))
 
-    page = pictures_template.substitute(title="lksjdf", pictures=pics)
+    page = pictures_template.substitute(title=title, pictures=pics)
     open(os.path.join(OUT_DIR, d+".html"), 'w').write(page)
 
     return min(timestamps), max(timestamps)
@@ -133,10 +133,16 @@ def build_pictures_page(d):
 # build a page for each subdir in /img/ and add a link to index.html
 items = []
 for d in next(os.walk(SRC_IMG_DIR))[1]:
+
+    if not os.listdir(os.path.join(SRC_IMG_DIR, d)):
+        print("empty dir", d)
+        continue
+
     print("building page for", d)
-    min_time, max_time = build_pictures_page(d)
+    title = formatTitle(d)
+    min_time, max_time = build_pictures_page(d, title)
     f = "{}.html".format(d)
-    stub = album_stub_template.substitute(path=f, title=formatTitle(d), date=min_time)
+    stub = album_stub_template.substitute(path=f, title=title, date=min_time)
     items.append((min_time, max_time, stub))
 
 # items = items.sort(key=lambda x: x[0])
