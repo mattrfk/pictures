@@ -1,16 +1,5 @@
 #!/usr/bin/env python3
 
-# /img
-#   /page1
-#       /heading1
-#             images...
-#       /heading2
-#   /page2
-#       images...
-# Nothing allowed in root img dir
-# Anything in a subfolder gets a heading
-# any images in direct child dir of /img are displayed without heading
-
 import os
 import datetime
 import time
@@ -92,17 +81,20 @@ print("copying css")
 call("cp {} {}".format(os.path.join(SRC_DIR, "*.css"), OUT_DIR), shell=True)
 
 # use pictures to build html
-print("generating index.html")
+print("generating html")
 
-index = open(os.path.join(SRC_DIR, "index.html")).read()
-pic_stub = open(os.path.join(SRC_DIR, "picture.html")).read()
+def makeStub(path):
+    return Template(open(path).read())
 
-pic_template = Template(pic_stub) 
-index_template = Template(index)
+index_template = makeStub(os.path.join(SRC_DIR, "index.html"))
+pictures_template =  makeStub(os.path.join(SRC_DIR, "pictures.html"))
+pic_stub_template = makeStub(os.path.join(SRC_DIR, "picture_stub.html"))
+album_stub_template = makeStub(os.path.join(SRC_DIR, "album_stub.html"))
 
 # do this for each directory in /img/
 def build_pictures_page(d):
     pics = ""
+    timestamps = []
 
     for dpath, dnames, fnames in os.walk(os.path.join(SRC_IMG_DIR, d)):
         for f in fnames:
@@ -123,24 +115,37 @@ def build_pictures_page(d):
 
                 if TIMESTAMP in exif:
                     t = datetime.datetime.strptime(exif[TIMESTAMP], "%Y:%m:%d %H:%M:%S")
+                    timestamps.append(t)
                     date = t.strftime('%a %B %d %-H:%M:%S %Y')
                 else: 
                     raise("No timestamp?!?!?")
 
-                pics += pic_template.substitute(large_uri=out_uri, 
+                pics += pic_stub_template.substitute(large_uri=out_uri, 
                         img_uri=out_uri+".small", 
                         alt="",
                         caption="{}{}".format(desc, date))
 
-    page = index_template.substitute(pictures=pics)
+    page = pictures_template.substitute(title="lksjdf", pictures=pics)
     open(os.path.join(OUT_DIR, d+".html"), 'w').write(page)
 
+    return min(timestamps), max(timestamps)
+
 # build a page for each subdir in /img/ and add a link to index.html
-links = ""
+items = []
 for d in next(os.walk(SRC_IMG_DIR))[1]:
     print("building page for", d)
-    build_pictures_page(d)
-    links += '<li><a href="{}.html">{}<//a></li>'.format(d, formatTitle(d))
+    min_time, max_time = build_pictures_page(d)
+    f = "{}.html".format(d)
+    stub = album_stub_template.substitute(path=f, title=formatTitle(d), date=min_time)
+    items.append((min_time, max_time, stub))
+
+# items = items.sort(key=lambda x: x[0])
+items = sorted(items, key=lambda x: x[0], reverse=True)
+
+links = ""
+for i in items:
+    links += i[2]
+    
 
 # add links to index, and write index to out/
 index = index_template.substitute(pictures=links)
