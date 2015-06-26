@@ -107,8 +107,6 @@ def build_pictures_page(d, title):
 
                 if IMAGE_DESC in exif:
                     desc = exif[IMAGE_DESC]
-                    # print(desc)
-                    desc += "<br>"
                 else:
                     desc = ""
                     print("[no description for {}]".format(uri))
@@ -123,7 +121,8 @@ def build_pictures_page(d, title):
                 pics += pic_stub_template.substitute(large_uri=out_uri, 
                         img_uri=out_uri+".small", 
                         alt="",
-                        caption="{}{}".format(desc, date))
+                        caption=desc,
+                        date=date)
 
     page = pictures_template.substitute(title=title, pictures=pics)
     open(os.path.join(OUT_DIR, d+".html"), 'w').write(page)
