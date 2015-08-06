@@ -3,6 +3,7 @@
 import os
 import datetime
 import time
+import logging
 
 from subprocess import call, Popen, PIPE
 from string import Template
@@ -19,7 +20,10 @@ SRC_IMG_DIR = os.path.join(SRC_DIR, IMAGE_DIR)
 IMAGE_DESC = 270
 TIMESTAMP = 36868
 
+logging.basicConfig(level=logging.DEBUG)
+
 def formatTitle(dirname):
+    logging.debug("formatting title")
     return dirname.replace("_", " ")
 
 # set up necessary dir structure
@@ -37,9 +41,9 @@ def createThumb(size, src, dest):
     if not os.path.exists(dest):
         print("creating thumbnail of", dest, "size", size)
         call("convert {0} -resize {2}x{2} {1}".format(src, dest, size), shell=True)
-    # else: 
-    #     print(dest, "already exists")
-        
+    else:
+        logging.debug(dest, "already exists")
+    
 
 # generate compressed pics
 # all go in one directory: out/img
@@ -63,18 +67,14 @@ for dpath, dnames, fnames in os.walk(os.path.join(SRC_DIR, IMAGE_DIR)):
 
 
 # remove pictures in out/img/ that don't exist in src/img/
-def clean():
-    # src_files = [f for f in [files for r, d, files in os.walk(SRC_IMG_DIR)]]
-    src_files = [files for r, d, files in os.walk(SRC_IMG_DIR)]
-    src_files = [item for sublist in src_files for item in sublist]
+src_files = [files for r, d, files in os.walk(SRC_IMG_DIR)]
+src_files = [item for sublist in src_files for item in sublist]
 
-    for dpath, dnames, fnames in os.walk(OUT_IMG_DIR):
-        for f in fnames:
-            if isJpeg(f) and not f in src_files:
-                print("removing", f)
-                call("rm {}*".format(os.path.join(dpath, f)), shell=True)
-
-clean()
+for dpath, dnames, fnames in os.walk(OUT_IMG_DIR):
+    for f in fnames:
+        if isJpeg(f) and not f in src_files:
+            print("removing", f)
+            call("rm {}*".format(os.path.join(dpath, f)), shell=True)
 
 # copy css
 print("copying css")
@@ -109,7 +109,7 @@ def build_pictures_page(d, title):
                     desc = exif[IMAGE_DESC]
                 else:
                     desc = ""
-                    print("[no description for {}]".format(uri))
+                    logging.info("no description for {}".format(uri))
 
                 if TIMESTAMP in exif:
                     t = datetime.datetime.strptime(exif[TIMESTAMP], "%Y:%m:%d %H:%M:%S")
@@ -134,7 +134,6 @@ def album_time_string(min_time, max_time):
     date = min_time.strftime(format_string)
 
     if (max_time - min_time).days > 0:
-        print("here")
         date += " - {}".format(max_time.strftime(format_string))
     
     return date
@@ -158,7 +157,6 @@ for d in next(os.walk(SRC_IMG_DIR))[1]:
     stub = album_stub_template.substitute(path=f, title=title, date=time_string)
     items.append((min_time, max_time, stub))
 
-# items = items.sort(key=lambda x: x[0])
 items = sorted(items, key=lambda x: x[0], reverse=True)
 
 links = ""
@@ -171,4 +169,3 @@ index = index_template.substitute(pictures=links)
 open(os.path.join(OUT_DIR, "index.html"), 'w').write(index)
 
 print("done!")
-
