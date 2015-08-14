@@ -2,6 +2,11 @@ img {
 	max-width:100%
 }
 
+#img {
+	margin-top:1em;
+
+}
+
 li {
 	max-width: 800px;
 	margin: 0 auto;
@@ -9,8 +14,11 @@ li {
 
 ul {
 	list-style-type:none;
-	text-align: center;
 	padding: 0;
+}
+
+#picture-count{
+	margin-bottom:0;
 }
 
 #pictures-list{
@@ -23,16 +31,16 @@ ul {
 	font-family: sans-serif;
 }
 
-#album-link:hover {
-	font-weight: bold;
-}
+/* #album-link:hover { */
+/* 	font-weight: bold; */
+/* } */
 
-#date-text {
-	margin:8px;
-	color: gray;
-	font-family: "Courier New", Courier, monospace;
-	font-size: 0.9em;
-}
+/* #date-text { */
+/* 	margin:8px; */
+/* 	color: gray; */
+/* 	font-family: "Courier New", Courier, monospace; */
+/* 	font-size: 0.9em; */
+/* } */
 
 #album-item {
 	margin-bottom:2em;
@@ -45,11 +53,16 @@ ul {
 #description{
 	margin-bottom:0px;
   margin-top: 4px;
-	font-family: "Courier New", Courier, monospace
 }
 
-#date {
-  margin-bottom: 40px;
-	margin-top: 4px;
-	font-family: "Courier New", Courier, monospace
+@media (min-width: 550px) {
+	#date{
+			text-align:right;
+	}
 }
+
+/* #date { */
+/*   margin-bottom: 40px; */
+/* 	margin-top: 4px; */
+/* 	font-family: "Courier New", Courier, monospace */
+/* } */

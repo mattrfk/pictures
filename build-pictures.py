@@ -42,7 +42,8 @@ def createThumb(size, src, dest):
         print("creating thumbnail of", dest, "size", size)
         call("convert {0} -resize {2}x{2} {1}".format(src, dest, size), shell=True)
     else:
-        logging.debug(dest, "already exists")
+        # logging.debug(dest, "already exists")
+        print(dest, "already exists")
     
 
 # generate compressed pics
@@ -95,10 +96,12 @@ album_stub_template = makeStub(os.path.join(SRC_DIR, "album_stub.html"))
 def build_pictures_page(d, title):
     pics = ""
     timestamps = []
+    count = 0
 
     for dpath, dnames, fnames in os.walk(os.path.join(SRC_IMG_DIR, d)):
         for f in fnames:
             if isJpeg(f):
+                count += 1
                 uri= os.path.join(IMAGE_DIR, d, f)
                 out_uri = os.path.join(IMAGE_DIR, f)
 
@@ -127,14 +130,14 @@ def build_pictures_page(d, title):
     page = pictures_template.substitute(title=title, pictures=pics)
     open(os.path.join(OUT_DIR, d+".html"), 'w').write(page)
 
-    return min(timestamps), max(timestamps)
+    return min(timestamps), max(timestamps), count
 
 def album_time_string(min_time, max_time):
     format_string = "%B %d, %Y"
     date = min_time.strftime(format_string)
 
     if (max_time - min_time).days > 0:
-        date += " - {}".format(max_time.strftime(format_string))
+        date += " through {}".format(max_time.strftime(format_string))
     
     return date
 
@@ -149,12 +152,12 @@ for d in next(os.walk(SRC_IMG_DIR))[1]:
 
     print("building page for", d)
     title = formatTitle(d)
-    min_time, max_time = build_pictures_page(d, title)
+    min_time, max_time, count = build_pictures_page(d, title)
     f = "{}.html".format(d)
 
     time_string = album_time_string(min_time, max_time)
 
-    stub = album_stub_template.substitute(path=f, title=title, date=time_string)
+    stub = album_stub_template.substitute(path=f, title=title, date=time_string, count=count)
     items.append((min_time, max_time, stub))
 
 items = sorted(items, key=lambda x: x[0], reverse=True)
