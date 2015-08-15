@@ -4,17 +4,33 @@ img {
 
 #img {
 	margin-top:1em;
+}
 
+.pictures {
+	width:100%;
+}
+
+.picture-container {
+	text-align: center;
 }
 
 li {
 	max-width: 800px;
 	margin: 0 auto;
+	list-style-type:none;
+}
+
+hr {
+	max-width: 800px;
 }
 
 ul {
-	list-style-type:none;
 	padding: 0;
+}
+
+.margin {
+	margin-left:2em;
+	margin-right:2em;
 }
 
 #picture-count{
@@ -30,17 +46,6 @@ ul {
 	font-size: 2em;
 	font-family: sans-serif;
 }
-
-/* #album-link:hover { */
-/* 	font-weight: bold; */
-/* } */
-
-/* #date-text { */
-/* 	margin:8px; */
-/* 	color: gray; */
-/* 	font-family: "Courier New", Courier, monospace; */
-/* 	font-size: 0.9em; */
-/* } */
 
 #album-item {
 	margin-bottom:2em;
@@ -60,9 +65,3 @@ ul {
 			text-align:right;
 	}
 }
-
-/* #date { */
-/*   margin-bottom: 40px; */
-/* 	margin-top: 4px; */
-/* 	font-family: "Courier New", Courier, monospace */
-/* } */

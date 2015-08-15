@@ -79,6 +79,7 @@ for dpath, dnames, fnames in os.walk(OUT_IMG_DIR):
 
 # copy css
 print("copying css")
+call("rm {}*.css".format(OUT_DIR), shell=True)
 call("cp {} {}".format(os.path.join(SRC_DIR, "*.css"), OUT_DIR), shell=True)
 
 # use pictures to build html
@@ -125,12 +126,10 @@ def build_pictures_page(d, title):
                         img_uri=out_uri+".small", 
                         alt="",
                         caption=desc,
-                        date=date)
+                        date=date,
+                        )
 
-    page = pictures_template.substitute(title=title, pictures=pics)
-    open(os.path.join(OUT_DIR, d+".html"), 'w').write(page)
-
-    return min(timestamps), max(timestamps), count
+    return min(timestamps), max(timestamps), count, pics
 
 def album_time_string(min_time, max_time):
     format_string = "%B %d, %Y"
@@ -152,12 +151,18 @@ for d in next(os.walk(SRC_IMG_DIR))[1]:
 
     print("building page for", d)
     title = formatTitle(d)
-    min_time, max_time, count = build_pictures_page(d, title)
+    min_time, max_time, count, pics = build_pictures_page(d, title)
+
     f = "{}.html".format(d)
 
     time_string = album_time_string(min_time, max_time)
 
+    # generate the album stub, also use this as the header for the album page
     stub = album_stub_template.substitute(path=f, title=title, date=time_string, count=count)
+
+    page = pictures_template.substitute(header=stub, title=title, pictures=pics)
+    open(os.path.join(OUT_DIR, d+".html"), 'w').write(page)
+
     items.append((min_time, max_time, stub))
 
 items = sorted(items, key=lambda x: x[0], reverse=True)
